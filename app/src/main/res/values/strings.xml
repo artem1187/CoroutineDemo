@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">CoroutineDemo</string>
+    <string name="app_name">Coroutine Demo</string>
+    <string name="launch_coroutines">Запуск корутин</string>
+    <string name="ready">Готов к работе</string>
+    <string name="started_coroutine">Started Coroutine %d</string>
+    <string name="finished_coroutine">Finished Coroutine %d</string>
 </resources>
