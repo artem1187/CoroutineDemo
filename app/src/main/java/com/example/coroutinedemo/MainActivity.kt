@@ -1,19 +1,14 @@
 package com.example.coroutinedemo
 
 import android.os.Bundle
-import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import com.example.coroutinedemo.databinding.ActivityMainBinding
-import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var count: Int = 1
-
-    // Создаем CoroutineScope
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,40 +18,31 @@ class MainActivity : AppCompatActivity() {
         setupSeekBar()
     }
 
-
-
     private fun setupSeekBar() {
-        binding.seekBar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seek: SeekBar,
-                                           progress: Int, fromUser: Boolean) {
+        // Устанавливаем начальное значение
+        binding.seekBar.progress = 1
+        binding.countText.text = "$count coroutine"
+
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                // Минимум 1 корутина
                 count = if (progress < 1) 1 else progress
-                binding.countText.text = "${count} coroutines"
+
+                // Обновляем текст с правильным склонением
+                val text = when {
+                    count == 1 -> "$count coroutine"
+                    else -> "$count coroutines"
+                }
+                binding.countText.text = text
             }
 
-            override fun onStartTrackingTouch(seek: SeekBar) {
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // Не требуется
             }
 
-            override fun onStopTrackingTouch(seek: SeekBar) {
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // Не требуется
             }
         })
-    }
-
-    private suspend fun performTask(taskNumber: Int): Deferred<String> =
-        coroutineScope.async(Dispatchers.Main) {
-            delay(5_000) // Задержка 5 секунд
-            return@async "Finished Coroutine ${taskNumber}"
-        }
-
-    fun launchCoroutines(view: View) {
-        // Запускаем корутины в цикле от 1 до выбранного количества
-        for (i in 1..count) {
-            binding.statusText.text = "Started Coroutine ${i}"
-
-            coroutineScope.launch(Dispatchers.Main) {
-                val result = performTask(i).await()
-                binding.statusText.text = result
-            }
-        }
     }
 }
