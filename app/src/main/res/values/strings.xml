@@ -4,4 +4,5 @@
     <string name="ready">Готов к работе</string>
     <string name="started_coroutine">Started Coroutine %d</string>
     <string name="finished_coroutine">Finished Coroutine %d</string>
+    <string name="thread_info">Корутины используют диспетчеры: Main (UI) и IO (фон)</string>
 </resources>
