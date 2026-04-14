@@ -1,6 +1,7 @@
 package com.example.coroutinedemo
 
 import android.os.Bundle
+import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import com.example.coroutinedemo.databinding.ActivityMainBinding
@@ -11,8 +12,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var binding: ActivityMainBinding
     private var count: Int = 1
-
-    // Создаем CoroutineScope с Main диспетчером
     private lateinit var job: Job
 
     override val coroutineContext: CoroutineContext
@@ -23,15 +22,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Инициализируем job
         job = Job()
-
         setupSeekBar()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Отменяем все запущенные корутины при уничтожении Activity
         job.cancel()
     }
 
@@ -51,12 +47,45 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         })
     }
 
-
     private suspend fun performTask(taskNumber: Int): Deferred<String> = coroutineScope {
         async(Dispatchers.Main) {
-            // Имитация длительной операции (5 секунд)
             delay(5000)
             "Finished Coroutine $taskNumber"
+        }
+    }
+
+    /**
+     * Метод, вызываемый при нажатии кнопки
+     * Запускает указанное количество корутин
+     */
+    fun launchCoroutines(view: View) {
+        // Отключаем кнопку на время выполнения, чтобы избежать множественных нажатий
+        binding.launchButton.isEnabled = false
+
+        // Запускаем корутины в цикле
+        for (i in 1..count) {
+            // Обновляем UI: корутина запущена
+            binding.statusText.text = "Started Coroutine $i"
+
+            // Запускаем корутину
+            launch(Dispatchers.Main) {
+                val result = performTask(i).await()
+                // Обновляем UI с результатом
+                binding.statusText.text = result
+
+                // Если это последняя корутина - включаем кнопку обратно
+                if (i == count) {
+                    binding.launchButton.isEnabled = true
+                    // Через 2 секунды сбрасываем статус
+                    delay(2000)
+                    binding.statusText.text = getString(com.example.coroutinedemo.R.string.ready)
+                }
+            }
+        }
+
+        // Если корутин нет, включаем кнопку обратно
+        if (count == 0) {
+            binding.launchButton.isEnabled = true
         }
     }
 }
